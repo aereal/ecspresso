@@ -15,10 +15,15 @@ import (
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/applicationautoscaling"
+	"github.com/aws/aws-sdk-go/service/applicationautoscaling/applicationautoscalingiface"
 	"github.com/aws/aws-sdk-go/service/cloudwatchlogs"
+	"github.com/aws/aws-sdk-go/service/cloudwatchlogs/cloudwatchlogsiface"
 	"github.com/aws/aws-sdk-go/service/codedeploy"
+	"github.com/aws/aws-sdk-go/service/codedeploy/codedeployiface"
 	"github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/aws/aws-sdk-go/service/ecs/ecsiface"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/iam/iamiface"
 	gc "github.com/kayac/go-config"
 	"github.com/mattn/go-isatty"
 	"github.com/morikuni/aec"
@@ -41,11 +46,11 @@ func taskDefinitionName(t *TaskDefinition) string {
 }
 
 type App struct {
-	ecs         *ecs.ECS
-	autoScaling *applicationautoscaling.ApplicationAutoScaling
-	codedeploy  *codedeploy.CodeDeploy
-	cwl         *cloudwatchlogs.CloudWatchLogs
-	iam         *iam.IAM
+	ecs         ecsiface.ECSAPI
+	autoScaling applicationautoscalingiface.ApplicationAutoScalingAPI
+	codedeploy  codedeployiface.CodeDeployAPI
+	cwl         cloudwatchlogsiface.CloudWatchLogsAPI
+	iam         iamiface.IAMAPI
 
 	sess     *session.Session
 	verifier *verifier
