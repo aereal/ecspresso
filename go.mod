@@ -9,6 +9,7 @@ require (
 	github.com/fatih/color v1.10.0
 	github.com/fujiwara/cfn-lookup v0.0.2
 	github.com/fujiwara/tfstate-lookup v0.2.3
+	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.5
 	github.com/hashicorp/go-envparse v0.0.0-20200406174449-d9cfd743a15e
 	github.com/hashicorp/go-version v1.3.0
