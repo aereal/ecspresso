@@ -265,7 +265,15 @@ func (d *App) GetLogEvents(ctx context.Context, logGroup string, logStream strin
 	return lines, nil
 }
 
-func NewApp(conf *Config) (*App, error) {
+type AWSAggregate struct {
+	ECS                    ecsiface.ECSAPI
+	ApplicationAutoScaling applicationautoscalingiface.ApplicationAutoScalingAPI
+	CodeDeploy             codedeployiface.CodeDeployAPI
+	CWLogs                 cloudwatchlogsiface.CloudWatchLogsAPI
+	IAM                    iamiface.IAMAPI
+}
+
+func NewAppWithAWSAggregate(conf *Config, aggr AWSAggregate) (*App, error) {
 	if err := conf.setupPlugins(); err != nil {
 		return nil, err
 	}
@@ -278,17 +286,28 @@ func NewApp(conf *Config) (*App, error) {
 	d := &App{
 		Service:     conf.Service,
 		Cluster:     conf.Cluster,
-		ecs:         ecs.New(sess),
-		autoScaling: applicationautoscaling.New(sess),
-		codedeploy:  codedeploy.New(sess),
-		cwl:         cloudwatchlogs.New(sess),
-		iam:         iam.New(sess),
+		ecs:         aggr.ECS,
+		autoScaling: aggr.ApplicationAutoScaling,
+		codedeploy:  aggr.CodeDeploy,
+		cwl:         aggr.CWLogs,
+		iam:         aggr.IAM,
 
 		sess:   sess,
 		config: conf,
 		loader: loader,
 	}
 	return d, nil
+}
+
+func NewApp(conf *Config) (*App, error) {
+	sess := conf.sess
+	return NewAppWithAWSAggregate(conf, AWSAggregate{
+		ECS:                    ecs.New(sess),
+		ApplicationAutoScaling: applicationautoscaling.New(sess),
+		CodeDeploy:             codedeploy.New(sess),
+		CWLogs:                 cloudwatchlogs.New(sess),
+		IAM:                    iam.New(sess),
+	})
 }
 
 func (d *App) Start() (context.Context, context.CancelFunc) {
