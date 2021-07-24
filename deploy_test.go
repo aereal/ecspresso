@@ -138,6 +138,7 @@ func TestDeploy_codeDeploy(t *testing.T) {
 	}
 	cases := []codeDeployTest{
 		{"cluster short name", "default"},
+		{"cluster full ARN", "arn:aws:ecs:ap-northeast-1:123456789012:cluster/default"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

@@ -280,7 +280,7 @@ func (d *App) findDeploymentInfo() (*codedeploy.DeploymentInfo, error) {
 			for _, dg := range groups.DeploymentGroupsInfo {
 				d.DebugLog("deploymentGroup", dg.String())
 				for _, ecsService := range dg.EcsServices {
-					if *ecsService.ClusterName == d.config.Cluster && *ecsService.ServiceName == d.config.Service {
+					if *ecsService.ClusterName == d.config.ClusterName() && *ecsService.ServiceName == d.config.Service {
 						return &codedeploy.DeploymentInfo{
 							ApplicationName:      aws.String(*info.ApplicationName),
 							DeploymentGroupName:  aws.String(*dg.DeploymentGroupName),
