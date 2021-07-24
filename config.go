@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/arn"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/fatih/color"
 	gv "github.com/hashicorp/go-version"
@@ -38,6 +40,19 @@ type Config struct {
 	dir                string
 	versionConstraints gv.Constraints
 	sess               *session.Session
+}
+
+// ClusterName returns always short name of the cluster.
+// Extracts the short name from the ARN if Config.Cluster is ARN
+func (c *Config) ClusterName() string {
+	if arn.IsARN(c.Cluster) {
+		parsed, err := arn.Parse(c.Cluster)
+		if err != nil {
+			panic(err)
+		}
+		return strings.Replace(parsed.Resource, "cluster/", "", 1)
+	}
+	return c.Cluster
 }
 
 // Load loads configuration file from file path.

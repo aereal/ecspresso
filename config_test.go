@@ -217,3 +217,25 @@ func TestConfigWithInvalidRequiredVersion(t *testing.T) {
 		})
 	}
 }
+
+func TestConfig_ClusterName(t *testing.T) {
+	tests := []struct {
+		name string
+		conf *ecspresso.Config
+		want string
+	}{
+		{"empty", &ecspresso.Config{}, "default"},
+		{"short name", &ecspresso.Config{Cluster: "my-cluster"}, "my-cluster"},
+		{"ARN", &ecspresso.Config{Cluster: "arn:aws:ecs:ap-northeast-1:123456789012:cluster/my-cluster"}, "my-cluster"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := tt.conf.Restrict(); err != nil {
+				t.Fatal(err)
+			}
+			if got := tt.conf.ClusterName(); got != tt.want {
+				t.Errorf("Config.ClusterName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
