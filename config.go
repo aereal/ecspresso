@@ -1,10 +1,12 @@
 package ecspresso
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 	"time"
 
@@ -58,6 +60,17 @@ func withExtStr(extStr map[string]string) newConfigLoaderOption {
 	}
 }
 
+func withExtStrFile(file string) newConfigLoaderOption {
+	return func(l *configLoader) {
+		if l == nil {
+			return
+		}
+		l.evalJsonnetOpts = append(l.evalJsonnetOpts, func(vm *jsonnet.VM) error {
+			return bindExtVar(file, vm.ExtVar)
+		})
+	}
+}
+
 func withExtCode(extCode map[string]string) newConfigLoaderOption {
 	return func(l *configLoader) {
 		if l == nil {
@@ -70,6 +83,38 @@ func withExtCode(extCode map[string]string) newConfigLoaderOption {
 			return nil
 		})
 	}
+}
+
+func withExtCodeFile(file string) newConfigLoaderOption {
+	return func(l *configLoader) {
+		if l == nil {
+			return
+		}
+		l.evalJsonnetOpts = append(l.evalJsonnetOpts, func(vm *jsonnet.VM) error {
+			return bindExtVar(file, vm.ExtCode)
+		})
+	}
+}
+
+func bindExtVar(file string, bindFn func(key, value string)) error {
+	f, err := os.Open(file)
+	if err != nil {
+		return fmt.Errorf("failed to open file %s: %w", file, err)
+	}
+	defer f.Close()
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := scanner.Text()
+		key, value, ok := strings.Cut(line, "=")
+		if !ok {
+			continue
+		}
+		bindFn(key, value)
+	}
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("failed to read %s: %w", file, err)
+	}
+	return nil
 }
 
 func newConfigLoader(opts ...newConfigLoaderOption) *configLoader {

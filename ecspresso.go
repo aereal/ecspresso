@@ -153,8 +153,16 @@ func WithLogger(l *log.Logger) AppOption {
 func New(ctx context.Context, opt *CLIOptions, newAppOptions ...AppOption) (*App, error) {
 	opt.resolveConfigFilePath()
 
+	loaderOpts := make([]newConfigLoaderOption, 0, 4)
+	loaderOpts = append(loaderOpts, withExtStr(opt.ExtStr), withExtCode(opt.ExtCode))
+	if file := opt.ExtStrFile; file != "" {
+		loaderOpts = append(loaderOpts, withExtStrFile(file))
+	}
+	if file := opt.ExtCodefile; file != "" {
+		loaderOpts = append(loaderOpts, withExtCodeFile(file))
+	}
 	appOpts := appOptions{
-		loader: newConfigLoader(withExtStr(opt.ExtStr), withExtCode(opt.ExtCode)),
+		loader: newConfigLoader(loaderOpts...),
 		logger: newLogger(),
 	}
 	for _, fn := range newAppOptions {

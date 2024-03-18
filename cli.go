@@ -11,7 +11,9 @@ type CLIOptions struct {
 	Envfile        []string          `help:"environment files" env:"ECSPRESSO_ENVFILE"`
 	Debug          bool              `help:"enable debug log" env:"ECSPRESSO_DEBUG"`
 	ExtStr         map[string]string `help:"external string values for Jsonnet" env:"ECSPRESSO_EXT_STR"`
+	ExtStrFile     string            `help:"the file path of Jsonnet external string values"`
 	ExtCode        map[string]string `help:"external code values for Jsonnet" env:"ECSPRESSO_EXT_CODE"`
+	ExtCodefile    string            `help:"the file path of Jsonnet external code values"`
 	ConfigFilePath string            `name:"config" help:"config file" default:"ecspresso.yml" env:"ECSPRESSO_CONFIG"`
 	AssumeRoleARN  string            `help:"the ARN of the role to assume" default:"" env:"ECSPRESSO_ASSUME_ROLE_ARN"`
 	Timeout        *time.Duration    `help:"timeout. Override in a configuration file." env:"ECSPRESSO_TIMEOUT"`
