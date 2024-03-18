@@ -63,7 +63,7 @@ func TestLoadConfigWithPluginDuplicate(t *testing.T) {
 	t.Setenv("TAG", "testing")
 	t.Setenv("JSON", `{"foo":"bar"}`)
 	ctx := context.Background()
-	loader := ecspresso.NewConfigLoader(nil, nil)
+	loader := ecspresso.NewConfigLoader()
 	_, err := loader.Load(ctx, "tests/config_duplicate_plugins.yaml", "")
 	if err == nil {
 		t.Log("expected an error to occur, but it didn't.")
@@ -264,7 +264,7 @@ func TestLoadConfigWithoutTimeout(t *testing.T) {
 	t.Setenv("AWS_REGION", "ap-northeast-2")
 
 	ctx := context.Background()
-	loader := ecspresso.NewConfigLoader(nil, nil)
+	loader := ecspresso.NewConfigLoader()
 	conf, err := loader.Load(ctx, "tests/notimeout.yml", "")
 	if err != nil {
 		t.Log("unexpected an error", err)
@@ -284,7 +284,7 @@ func TestLoadConfigWithoutTimeout(t *testing.T) {
 
 func TestLoadConfigForCodeDeploy(t *testing.T) {
 	ctx := context.Background()
-	loader := ecspresso.NewConfigLoader(nil, nil)
+	loader := ecspresso.NewConfigLoader()
 	for _, ext := range []string{"yml", "json", "jsonnet"} {
 		name := "tests/config_codedeploy." + ext
 		conf, err := loader.Load(ctx, name, "")

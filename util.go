@@ -34,7 +34,7 @@ func isLongArnFormat(a string) (bool, error) {
 func (d *App) readDefinitionFile(path string) ([]byte, error) {
 	switch filepath.Ext(path) {
 	case jsonnetExt:
-		jsonStr, err := d.loader.VM.EvaluateFile(path)
+		jsonStr, err := d.loader.evaluateJsonnet(path)
 		if err != nil {
 			return nil, err
 		}

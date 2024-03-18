@@ -27,21 +27,59 @@ var awsv2ConfigLoadOptionsFunc []func(*awsConfig.LoadOptions) error
 
 type configLoader struct {
 	*goConfig.Loader
-	VM *jsonnet.VM
+	evalJsonnetOpts []evalJsonnetOpt
 }
 
-func newConfigLoader(extStr, extCode map[string]string) *configLoader {
+func (l *configLoader) evaluateJsonnet(file string) (string, error) {
 	vm := jsonnet.MakeVM()
-	for k, v := range extStr {
-		vm.ExtVar(k, v)
+	for _, o := range l.evalJsonnetOpts {
+		if err := o(vm); err != nil {
+			return "", err
+		}
 	}
-	for k, v := range extCode {
-		vm.ExtCode(k, v)
+	return vm.EvaluateFile(file)
+}
+
+type evalJsonnetOpt func(vm *jsonnet.VM) error
+
+type newConfigLoaderOption func(l *configLoader)
+
+func withExtStr(extStr map[string]string) newConfigLoaderOption {
+	return func(l *configLoader) {
+		if l == nil {
+			return
+		}
+		l.evalJsonnetOpts = append(l.evalJsonnetOpts, func(vm *jsonnet.VM) error {
+			for k, v := range extStr {
+				vm.ExtVar(k, v)
+			}
+			return nil
+		})
 	}
-	return &configLoader{
+}
+
+func withExtCode(extCode map[string]string) newConfigLoaderOption {
+	return func(l *configLoader) {
+		if l == nil {
+			return
+		}
+		l.evalJsonnetOpts = append(l.evalJsonnetOpts, func(vm *jsonnet.VM) error {
+			for k, v := range extCode {
+				vm.ExtCode(k, v)
+			}
+			return nil
+		})
+	}
+}
+
+func newConfigLoader(opts ...newConfigLoaderOption) *configLoader {
+	l := &configLoader{
 		Loader: goConfig.New(),
-		VM:     vm,
 	}
+	for _, o := range opts {
+		o(l)
+	}
+	return l
 }
 
 // Config represents a configuration.
@@ -84,7 +122,7 @@ func (l *configLoader) Load(ctx context.Context, path string, version string) (*
 			return nil, fmt.Errorf("failed to parse yaml: %w", err)
 		}
 	case jsonExt, jsonnetExt:
-		jsonStr, err := l.VM.EvaluateFile(path)
+		jsonStr, err := l.evaluateJsonnet(path)
 		if err != nil {
 			return nil, fmt.Errorf("failed to evaluate jsonnet file: %w", err)
 		}

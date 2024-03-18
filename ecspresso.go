@@ -140,7 +140,7 @@ func WithConfig(c *Config) AppOption {
 
 func WithConfigLoader(extstr, extcode map[string]string) AppOption {
 	return func(o *appOptions) {
-		o.loader = newConfigLoader(extstr, extcode)
+		o.loader = newConfigLoader(withExtStr(extstr), withExtCode(extcode))
 	}
 }
 
@@ -154,7 +154,7 @@ func New(ctx context.Context, opt *CLIOptions, newAppOptions ...AppOption) (*App
 	opt.resolveConfigFilePath()
 
 	appOpts := appOptions{
-		loader: newConfigLoader(opt.ExtStr, opt.ExtCode),
+		loader: newConfigLoader(withExtStr(opt.ExtStr), withExtCode(opt.ExtCode)),
 		logger: newLogger(),
 	}
 	for _, fn := range newAppOptions {
